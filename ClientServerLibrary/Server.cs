@@ -14,7 +14,8 @@ namespace ClientServerPrototype
     {
         Message,
         Save,
-        Load
+        Load,
+        Close = -1
     }
 
     public class Server
