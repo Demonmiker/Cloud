@@ -14,7 +14,7 @@ namespace ClientServerPrototype
     {
         public Socket socket = new Socket(AddressFamily.InterNetwork,
           SocketType.Stream, ProtocolType.Tcp);
-        Byte[] ms_buf = new Byte[10000];
+        Byte[] ms_buf = new Byte[10000000];
         public MemoryStream ms;
         public BinaryWriter bw;
         public BinaryReader br;

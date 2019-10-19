@@ -20,7 +20,7 @@ namespace ClientServerPrototype
     public class Server
     {
         Socket socket = new Socket(AddressFamily.InterNetwork,SocketType.Stream, ProtocolType.Tcp);
-        Byte[] ms_buf = new Byte[10000];
+        Byte[] ms_buf = new Byte[10000000];
         MemoryStream ms;
         BinaryReader br;
         BinaryWriter bw;

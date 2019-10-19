@@ -20,7 +20,6 @@ namespace ClientServerTest
                 Write("Port:");
                 int.TryParse(ReadLine(), out int port);
                 s.Start(port);
-                
             }
             else
             {
