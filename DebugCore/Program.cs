@@ -17,13 +17,20 @@ namespace ClientServerTest
             {
                 Console.Title = "Server";
                 Server s = new Server();
-                s.Start(907);
+                Write("Port:");
+                int.TryParse(ReadLine(), out int port);
+                s.Start(port);
+                
             }
             else
             {
                 Console.Title = "Client";
                 Client c = new Client();
-                c.Connect("127.0.0.1", 907);
+                Write("IP:");
+                string Ip = ReadLine();
+                Write("Port:");
+                int.TryParse(ReadLine(),out int port);
+                c.Connect(Ip, port);
                 while (true)
                 {
                     WriteLine("cmd");
