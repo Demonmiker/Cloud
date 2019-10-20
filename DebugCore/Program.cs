@@ -10,8 +10,10 @@ namespace ClientServerTest
 {
     class Program
     {
+        static string[] Commands;
         static void Main(string[] args)
         {
+            Commands = Enum.GetNames(typeof(Command));
             Console.Title = "c/s";
             if(ReadLine()=="s")
             {
@@ -36,11 +38,23 @@ namespace ClientServerTest
                     Console.WriteLine("Подключился");
                     while (true)
                     {
+                        int CmdCode = 0;
                         WriteLine("cmd");
-                        int.TryParse(ReadLine(), out int cmd);
-                        WriteLine("param");
-                        string param = ReadLine();
-                        c.Send((Command)cmd, param);
+                        string cmd = ReadLine();
+                        string[] buf = cmd.Split(new char[] { '>',':' }, StringSplitOptions.RemoveEmptyEntries);
+                        if (buf.Length < 2)
+                            continue;
+                        if(!int.TryParse(buf[0], out CmdCode))
+                        {
+                            for (int i = 0; i < Commands.Length; i++)
+                            {
+                                if(Commands[i]==buf[0])
+                                {
+                                    CmdCode = i;
+                                }
+                            }
+                        }
+                        c.Send((Command)CmdCode, buf[1]);
                     }
                 }
                 else
