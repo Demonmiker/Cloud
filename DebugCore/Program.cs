@@ -27,16 +27,25 @@ namespace ClientServerTest
                 Client c = new Client();
                 Write("IP:");
                 string Ip = ReadLine();
+                if (Ip == "l")
+                    Ip = "127.0.0.1";
                 Write("Port:");
                 int.TryParse(ReadLine(),out int port);
-                c.Connect(Ip, port);
-                while (true)
+                if (c.Connect(Ip, port))
                 {
-                    WriteLine("cmd");
-                    int.TryParse(ReadLine(),out int cmd);
-                    WriteLine("param");
-                    string param = ReadLine();
-                    c.Send((Command)cmd, param);
+                    Console.WriteLine("Подключился");
+                    while (true)
+                    {
+                        WriteLine("cmd");
+                        int.TryParse(ReadLine(), out int cmd);
+                        WriteLine("param");
+                        string param = ReadLine();
+                        c.Send((Command)cmd, param);
+                    }
+                }
+                else
+                {
+                    Console.WriteLine("Подключение не получилос");
                 }
             }
             ReadKey();

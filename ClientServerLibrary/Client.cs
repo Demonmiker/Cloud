@@ -26,11 +26,15 @@ namespace ClientServerPrototype
             br = new BinaryReader(ms);
         }
 
-        public void Connect(String IP_Adress, int Port_Number)
+        public bool Connect(String IP_Adress, int Port_Number)
         {
-            Console.WriteLine("Подключаюсь");
-            socket.Connect(IP_Adress, Port_Number);
-            Console.WriteLine("Подключился");
+            try
+            {
+                socket.Connect(IP_Adress, Port_Number);
+            }
+            catch { return false; }
+            return true;
+            
         }
 
         public void Close()
@@ -41,7 +45,7 @@ namespace ClientServerPrototype
         public void Send(Command cmd,string s)
         {
             ms.SetLength(0);
-            ms.SetLength(10000);
+            ms.SetLength(10000000);
             bw.Write((int)cmd);
             switch (cmd)
             {
@@ -55,36 +59,54 @@ namespace ClientServerPrototype
                     PackageLoad(s);
                     break;
             }
-
-            socket.Send(ms_buf);
         }
 
-        public void PackageMessage(string s)
+        public bool PackageMessage(string s)
         {
             bw.Write(s);
             socket.Send(ms_buf);
             //
             socket.Receive(ms_buf);
             WriteLine(br.ReadString());
+            return true;
         }
         
-        public void PackageSave(string s)
+        public bool PackageSave(string s)
         {
-            Utils.LoadFile(bw, s);
-            socket.Send(ms_buf);
-            //
-            socket.Receive(ms_buf);
-            WriteLine(br.ReadString());
+            if(Utils.LoadFile(bw, s))
+            {
+                socket.Send(ms_buf);
+                //
+                socket.Receive(ms_buf);
+                WriteLine(br.ReadString());
+                return true;
+            }
+            else
+            {
+                WriteLine("Ну далось найти файл");
+                return false;
+            }
+            
         }
 
-        public void PackageLoad(string s)
+        public bool PackageLoad(string s)
         {
             bw.Write(s);
             socket.Send(ms_buf);
             //
             socket.Receive(ms_buf);
-            Console.WriteLine("Куда скачивать?:");
-            Utils.SaveFile(br, ReadLine());
+            if(br.ReadInt32()==0)
+            {
+                Console.WriteLine("Куда скачивать?:");
+                if (!Utils.SaveFile(br, ReadLine()))
+                    WriteLine("Файл не сохранен");
+            }
+            else
+            {
+                Console.WriteLine(br.ReadString());
+            }
+            return true;
+
         }
 
         ~Client()

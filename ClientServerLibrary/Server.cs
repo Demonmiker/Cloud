@@ -77,7 +77,6 @@ namespace ClientServerPrototype
                     HandleLoad();
                     break;
             }
-            cs.Receive(ms_buf);//КОСТЫЛь ????
         }
 
         #region Handlers
@@ -92,16 +91,36 @@ namespace ClientServerPrototype
 
         void HandleSave()
         {
-            Utils.SaveFile(br,"ServerData");
-            bw.Write("Файл сохранен");
-            cs.Send(ms_buf);
+            if(Utils.SaveFile(br,"ServerData"))
+            {
+                bw.Write("Файл сохранен");
+                cs.Send(ms_buf);
+            }
+            else
+            {
+                bw.Write("Файл не сохранен");
+                cs.Send(ms_buf);
+            }
+            
         }
 
         void HandleLoad()
         {
             string path = br.ReadString();
-            Utils.LoadFile(bw, "ServerData/" + path);
-            cs.Send(ms_buf);
+            path = "ServerData/" + path;
+            if (Utils.CheckFile(path))
+            {
+                bw.Write(0);
+                Utils.LoadFile(bw, path);
+                cs.Send(ms_buf);
+            }
+            else
+            {
+                bw.Write(1);
+                bw.Write("Не удалось получить файл");
+                cs.Send(ms_buf);
+            }
+            
         }
         #endregion
 
