@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.902
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ClientServerLibrary", "ClientServerLibrary\ClientServerLibrary.csproj", "{5E3C7426-9B40-420D-BACC-1DE34F1C7DBC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientServerLibrary", "ClientServerLibrary\ClientServerLibrary.csproj", "{5E3C7426-9B40-420D-BACC-1DE34F1C7DBC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DebugCore", "DebugCore\DebugCore.csproj", "{0BF1FE79-D4B2-4F57-B577-CAEA82ED1F8C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DebugCore", "DebugCore\DebugCore.csproj", "{0BF1FE79-D4B2-4F57-B577-CAEA82ED1F8C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

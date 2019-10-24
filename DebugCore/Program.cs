@@ -13,6 +13,7 @@ namespace ClientServerTest
         static string[] Commands;
         static void Main(string[] args)
         {
+            Console.WriteLine(Environment.CurrentDirectory);
             Commands = Enum.GetNames(typeof(Command));
             Console.Title = "c/s";
             if(ReadLine()=="s")
@@ -41,7 +42,7 @@ namespace ClientServerTest
                         int CmdCode = 0;
                         WriteLine("cmd");
                         string cmd = ReadLine();
-                        string[] buf = cmd.Split(new char[] { '>',':' }, StringSplitOptions.RemoveEmptyEntries);
+                        string[] buf = cmd.Split(new char[] { '>' }, StringSplitOptions.RemoveEmptyEntries);
                         if (buf.Length < 2)
                             continue;
                         if(!int.TryParse(buf[0], out CmdCode))
