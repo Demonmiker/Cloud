@@ -11,15 +11,33 @@ namespace ClientServerLibrary
     {
         public bool PackageDelete(string s)
         {
+            bw.Write(s);
+            socket.Send(ms_buf);
+            socket.Receive(ms_buf);
+            WriteLine(br.ReadString());
             return true;
         }
 
         public bool PackageMove(string s)
         {
+            bw.Write(s);
+            WriteLine("Введите новое расположение файла");
+            s = ReadLine();
+            bw.Write(s);
+            socket.Send(ms_buf);
+            socket.Receive(ms_buf);
+            WriteLine(br.ReadString());
             return true;
         }
         public bool PackageRename(string s)
         {
+            bw.Write(s);
+            WriteLine("Введите новое имя файла");
+            s = ReadLine();
+            bw.Write(s);
+            socket.Send(ms_buf);
+            socket.Receive(ms_buf);
+            WriteLine(br.ReadString());
             return true;
         }
     
