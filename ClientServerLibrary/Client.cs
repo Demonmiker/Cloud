@@ -86,6 +86,11 @@ namespace ClientServerPrototype
 
         public bool PackageSearch(string s)
         {
+            bw.Write(s);
+            socket.Send(ms_buf);
+            //
+            socket.Receive(ms_buf);
+            WriteLine(br.ReadString());
             return true;
         }
 

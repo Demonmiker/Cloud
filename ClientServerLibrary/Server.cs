@@ -82,7 +82,8 @@ namespace ClientServerPrototype
         }
         public void HandleSearch()
         {
-            return;
+            string path = br.ReadString();
+
         }
 
 
