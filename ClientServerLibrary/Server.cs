@@ -11,7 +11,7 @@ using static System.Console;
 namespace ClientServerPrototype
 {
 
-    public class Server
+    public partial class Server
     {
         Socket socket = new Socket(AddressFamily.InterNetwork,SocketType.Stream, ProtocolType.Tcp);
         Byte[] ms_buf = new Byte[10000000];

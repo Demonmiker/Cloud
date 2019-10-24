@@ -10,7 +10,7 @@ using static System.Console;
 
 namespace ClientServerPrototype
 {
-    public class Client
+    public  partial class Client
     {
         public Socket socket = new Socket(AddressFamily.InterNetwork,
           SocketType.Stream, ProtocolType.Tcp);
