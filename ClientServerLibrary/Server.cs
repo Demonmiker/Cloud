@@ -8,17 +8,10 @@ using System.Net.Sockets;
 using System.IO;
 using static System.Console;
 
-namespace ClientServerPrototype
+namespace ClientServerLibrary
 {
-    public enum Command
-    {
-        Message,
-        Save,
-        Load,
-        Close = -1
-    }
 
-    public class Server
+    public partial class Server
     {
         Socket socket = new Socket(AddressFamily.InterNetwork,SocketType.Stream, ProtocolType.Tcp);
         Byte[] ms_buf = new Byte[10000000];
@@ -76,6 +69,18 @@ namespace ClientServerPrototype
                 case Command.Load:
                     HandleLoad();
                     break;
+                case Command.Delete:
+                    HandleDelete();
+                    break;
+                case Command.Rename:
+                    HandleRename();
+                    break;
+                case Command.Move:
+                    HandleMove();
+                    break;
+                case Command.Search:
+                    HandleSearch();
+                    break;
             }
         }
 
@@ -87,11 +92,36 @@ namespace ClientServerPrototype
             cs.Send(ms_buf);
            
         }
-        
+        public void HandleSearch()
+        {
+            string path = br.ReadString();
+            if (path == string.Empty)
+                path = "ServerData";
+            else
+                path = "ServerData/" + path;
+            StringBuilder sb = new StringBuilder(32);
+            foreach(string s in Directory.EnumerateDirectories(path))
+            {
+                sb.Append("D:" + s.Replace(path + '\\', "") + "?");
+            }
+            foreach (string s in Directory.EnumerateFiles(path))
+            {
+                sb.Append("F:" + s.Replace(path + "\\","") + "?");
+            }
+            bw.Write(sb.ToString());
+            cs.Send(ms_buf);
+        }
+
+
 
         void HandleSave()
         {
-            if(Utils.SaveFile(br,"ServerData"))
+            string path = br.ReadString();
+            if (path == string.Empty)
+                path = "ServerData";
+            else
+                path = "ServerData/" + path;
+            if(Utils.SaveFile(br,path))
             {
                 bw.Write("Файл сохранен");
                 cs.Send(ms_buf);

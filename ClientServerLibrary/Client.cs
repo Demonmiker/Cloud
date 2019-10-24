@@ -8,9 +8,9 @@ using System.Net.Sockets;
 using System.IO;
 using static System.Console;
 
-namespace ClientServerPrototype
+namespace ClientServerLibrary
 {
-    public class Client
+    public partial class Client
     {
         public Socket socket = new Socket(AddressFamily.InterNetwork,
           SocketType.Stream, ProtocolType.Tcp);
@@ -58,8 +58,21 @@ namespace ClientServerPrototype
                 case Command.Load:
                     PackageLoad(s);
                     break;
+                case Command.Delete:
+                    PackageDelete (s);
+                    break;
+                case Command.Rename:
+                    PackageRename(s);
+                    break;
+                case Command.Search:
+                    PackageSearch(s);
+                    break;
+                case Command.Move:
+                    PackageMove(s);
+                    break;
             }
         }
+
 
         public bool PackageMessage(string s)
         {
@@ -70,11 +83,29 @@ namespace ClientServerPrototype
             WriteLine(br.ReadString());
             return true;
         }
-        
+
+        public bool PackageSearch(string s)
+        {
+            bw.Write(s);
+            socket.Send(ms_buf);
+            //
+            socket.Receive(ms_buf);
+            string str = br.ReadString();
+            str = str.Replace("?", Environment.NewLine);
+            WriteLine(str);
+            return true;
+        }
+
         public bool PackageSave(string s)
         {
-            if(Utils.LoadFile(bw, s))
+            string[] buf = s.Split('*');
+            if(buf.Length<2)
+                bw.Write(string.Empty);
+            else
+                bw.Write(buf[1]);
+            if (Utils.LoadFile(bw, buf[0]))
             {
+                
                 socket.Send(ms_buf);
                 //
                 socket.Receive(ms_buf);
