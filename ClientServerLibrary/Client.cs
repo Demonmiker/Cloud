@@ -90,14 +90,22 @@ namespace ClientServerLibrary
             socket.Send(ms_buf);
             //
             socket.Receive(ms_buf);
-            WriteLine(br.ReadString());
+            string str = br.ReadString();
+            str = str.Replace("?", Environment.NewLine);
+            WriteLine(str);
             return true;
         }
 
         public bool PackageSave(string s)
         {
-            if(Utils.LoadFile(bw, s))
+            string[] buf = s.Split('*');
+            if(buf.Length<2)
+                bw.Write(string.Empty);
+            else
+                bw.Write(buf[1]);
+            if (Utils.LoadFile(bw, buf[0]))
             {
+                
                 socket.Send(ms_buf);
                 //
                 socket.Receive(ms_buf);

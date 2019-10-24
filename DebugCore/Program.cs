@@ -43,8 +43,7 @@ namespace ClientServerTest
                         WriteLine("cmd");
                         string cmd = ReadLine();
                         string[] buf = cmd.Split(new char[] { '>' }, StringSplitOptions.RemoveEmptyEntries);
-                        if (buf.Length < 2)
-                            continue;
+                        
                         if(!int.TryParse(buf[0], out CmdCode))
                         {
                             for (int i = 0; i < Commands.Length; i++)
@@ -55,7 +54,10 @@ namespace ClientServerTest
                                 }
                             }
                         }
-                        c.Send((Command)CmdCode, buf[1]);
+                        if (buf.Length < 2)
+                            c.Send((Command)CmdCode, string.Empty);
+                        else
+                            c.Send((Command)CmdCode, buf[1]);
                     }
                 }
                 else

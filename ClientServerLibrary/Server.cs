@@ -95,14 +95,33 @@ namespace ClientServerLibrary
         public void HandleSearch()
         {
             string path = br.ReadString();
-
+            if (path == string.Empty)
+                path = "ServerData";
+            else
+                path = "ServerData/" + path;
+            StringBuilder sb = new StringBuilder(32);
+            foreach(string s in Directory.EnumerateDirectories(path))
+            {
+                sb.Append("D:" + s.Replace(path + '\\', "") + "?");
+            }
+            foreach (string s in Directory.EnumerateFiles(path))
+            {
+                sb.Append("F:" + s.Replace(path + "\\","") + "?");
+            }
+            bw.Write(sb.ToString());
+            cs.Send(ms_buf);
         }
 
 
 
         void HandleSave()
         {
-            if(Utils.SaveFile(br,"ServerData"))
+            string path = br.ReadString();
+            if (path == string.Empty)
+                path = "ServerData";
+            else
+                path = "ServerData/" + path;
+            if(Utils.SaveFile(br,path))
             {
                 bw.Write("Файл сохранен");
                 cs.Send(ms_buf);
