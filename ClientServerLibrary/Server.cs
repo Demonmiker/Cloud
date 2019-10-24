@@ -69,6 +69,18 @@ namespace ClientServerPrototype
                 case Command.Load:
                     HandleLoad();
                     break;
+                case Command.Delete:
+                    HandleMessage();
+                    break;
+                case Command.Rename:
+                    HandleSave();
+                    break;
+                case Command.Move:
+                    HandleLoad();
+                    break;
+                case Command.Search:
+                    HandleLoad();
+                    break;
             }
         }
 
