@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using ClientServerPrototype;
+using ClientServerLibrary;
 using static System.Console;
 
 namespace ClientServerTest

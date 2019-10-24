@@ -42,7 +42,7 @@ namespace ClientServerLibrary
             socket.Close();
         }
 
-        public void Send(Command cmd,string s)
+        public void Send(Command cmd, string s)
         {
             ms.SetLength(0);
             ms.SetLength(10000000);
