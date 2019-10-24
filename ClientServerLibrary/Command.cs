@@ -1,4 +1,4 @@
-﻿namespace ClientServerPrototype
+﻿namespace ClientServerLibrary
 {
     public enum Command
     {

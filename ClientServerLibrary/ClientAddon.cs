@@ -7,7 +7,7 @@ using static System.Console;
 
 namespace ClientServerLibrary
 {
-    partial class Client
+    public partial class Client
     {
         public bool PackageDelete(string s)
         {

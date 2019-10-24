@@ -8,7 +8,7 @@ using System.Net.Sockets;
 using System.IO;
 using static System.Console;
 
-namespace ClientServerPrototype
+namespace ClientServerLibrary
 {
 
     public partial class Server
@@ -70,16 +70,16 @@ namespace ClientServerPrototype
                     HandleLoad();
                     break;
                 case Command.Delete:
-                    HandleMessage();
+                    HandleDelete();
                     break;
                 case Command.Rename:
-                    HandleSave();
+                    HandleRename();
                     break;
                 case Command.Move:
-                    HandleLoad();
+                    HandleMove();
                     break;
                 case Command.Search:
-                    HandleLoad();
+                    HandleSearch();
                     break;
             }
         }

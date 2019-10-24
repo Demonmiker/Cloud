@@ -8,9 +8,9 @@ using System.Net.Sockets;
 using System.IO;
 using static System.Console;
 
-namespace ClientServerPrototype
+namespace ClientServerLibrary
 {
-    public  partial class Client
+    public partial class Client
     {
         public Socket socket = new Socket(AddressFamily.InterNetwork,
           SocketType.Stream, ProtocolType.Tcp);
@@ -59,16 +59,16 @@ namespace ClientServerPrototype
                     PackageLoad(s);
                     break;
                 case Command.Delete:
-                    PackageMessage(s);
+                    PackageDelete (s);
                     break;
                 case Command.Rename:
-                    PackageSave(s);
+                    PackageRename(s);
                     break;
                 case Command.Search:
-                    PackageLoad(s);
+                    PackageSearch(s);
                     break;
                 case Command.Move:
-                    PackageLoad(s);
+                    PackageMove(s);
                     break;
             }
         }
