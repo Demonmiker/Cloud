@@ -58,8 +58,21 @@ namespace ClientServerPrototype
                 case Command.Load:
                     PackageLoad(s);
                     break;
+                case Command.Delete:
+                    PackageMessage(s);
+                    break;
+                case Command.Rename:
+                    PackageSave(s);
+                    break;
+                case Command.Search:
+                    PackageLoad(s);
+                    break;
+                case Command.Move:
+                    PackageLoad(s);
+                    break;
             }
         }
+
 
         public bool PackageMessage(string s)
         {
@@ -70,7 +83,12 @@ namespace ClientServerPrototype
             WriteLine(br.ReadString());
             return true;
         }
-        
+
+        public bool PackageSearch(string s)
+        {
+            return true;
+        }
+
         public bool PackageSave(string s)
         {
             if(Utils.LoadFile(bw, s))

@@ -80,7 +80,12 @@ namespace ClientServerPrototype
             cs.Send(ms_buf);
            
         }
-        
+        public void HandleSearch()
+        {
+            return;
+        }
+
+
 
         void HandleSave()
         {
