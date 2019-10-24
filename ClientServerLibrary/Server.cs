@@ -10,13 +10,6 @@ using static System.Console;
 
 namespace ClientServerPrototype
 {
-    public enum Command
-    {
-        Message,
-        Save,
-        Load,
-        Close = -1
-    }
 
     public class Server
     {
