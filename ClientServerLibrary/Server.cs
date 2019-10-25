@@ -139,19 +139,15 @@ namespace ClientServerLibrary
 
         void HandleLoad()
         {
-            string path = br.ReadString();
-            path = "ServerData/" + path;
-            if (Utils.CheckFile(path))
+            string path = SD(br.ReadString());
+            long size = Utils.FileSize(path);
+            bw.Write(size);
+            cs.Send(ms_buf);
+            if (size == -1) return;
+            FNB.Init(size + 10000);
+            if(Utils.LoadFile(FNB.Bw, path))
             {
-                bw.Write(0);
-                Utils.LoadFile(bw, path);
-                cs.Send(ms_buf);
-            }
-            else
-            {
-                bw.Write(1);
-                bw.Write("Не удалось получить файл");
-                cs.Send(ms_buf);
+                cs.Send(FNB.Ms_Buf);
             }
             
         }
