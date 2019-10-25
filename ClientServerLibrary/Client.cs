@@ -44,39 +44,45 @@ namespace ClientServerLibrary
 
         public void Send(Command cmd, string s)
         {
+            Send(cmd, s.Split('*'));
+        }
+
+        public void Send(Command cmd, string[] param)
+        {
             ms.SetLength(0);
             ms.SetLength(10000000);
             bw.Write((int)cmd);
             switch (cmd)
             {
                 case Command.Message:
-                    PackageMessage(s);
+                    PackageMessage(param);
                     break;
                 case Command.Save:
-                    PackageSave(s);
+                    PackageSave(param);
                     break;
                 case Command.Load:
-                    PackageLoad(s);
+                    PackageLoad(param);
                     break;
                 case Command.Delete:
-                    PackageDelete (s);
+                    PackageDelete (param);
                     break;
                 case Command.Rename:
-                    PackageRename(s);
+                    PackageRename(param);
                     break;
                 case Command.Search:
-                    PackageSearch(s);
+                    PackageSearch(param);
                     break;
                 case Command.Move:
-                    PackageMove(s);
+                    PackageMove(param);
                     break;
             }
         }
 
-
-        public bool PackageMessage(string s)
+        #region Packages
+        public bool PackageMessage(string[] s)
         {
-            bw.Write(s);
+            if (s.Length < 1) return false;
+            bw.Write(s[0]);
             socket.Send(ms_buf);
             //
             socket.Receive(ms_buf);
@@ -84,9 +90,10 @@ namespace ClientServerLibrary
             return true;
         }
 
-        public bool PackageSearch(string s)
+        public bool PackageSearch(string[] s)
         {
-            bw.Write(s);
+            if (s.Length < 1) return false;
+            bw.Write(s[0]);
             socket.Send(ms_buf);
             //
             socket.Receive(ms_buf);
@@ -96,14 +103,13 @@ namespace ClientServerLibrary
             return true;
         }
 
-        public bool PackageSave(string s)
+        public bool PackageSave(string[] s)
         {
-            string[] buf = s.Split('*');
-            if(buf.Length<2)
+            if(s.Length<2)
                 bw.Write(string.Empty);
             else
-                bw.Write(buf[1]);
-            if (Utils.LoadFile(bw, buf[0]))
+                bw.Write(s[1]);
+            if (Utils.LoadFile(bw, s[0]))
             {
                 
                 socket.Send(ms_buf);
@@ -120,9 +126,10 @@ namespace ClientServerLibrary
             
         }
 
-        public bool PackageLoad(string s)
+        public bool PackageLoad(string[] s)
         {
-            bw.Write(s);
+            if (s.Length < 1) return false;
+            bw.Write(s[0]);
             socket.Send(ms_buf);
             //
             socket.Receive(ms_buf);
@@ -139,6 +146,7 @@ namespace ClientServerLibrary
             return true;
 
         }
+        #endregion
 
         ~Client()
         {

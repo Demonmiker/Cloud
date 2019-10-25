@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using ClientServerLibrary;
 using static System.Console;
 
-namespace ClientServerTest
+namespace DebugFrame
 {
     class Program
     {

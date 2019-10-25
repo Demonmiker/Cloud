@@ -9,32 +9,31 @@ namespace ClientServerLibrary
 {
     public partial class Client
     {
-        public bool PackageDelete(string s)
+        public bool PackageDelete(string[] s)
         {
-            bw.Write(s);
+            if (s.Length < 1) return false;
+            bw.Write(s[0]);
             socket.Send(ms_buf);
             socket.Receive(ms_buf);
             WriteLine(br.ReadString());
             return true;
         }
 
-        public bool PackageMove(string s)
+        public bool PackageMove(string[] s)
         {
-            bw.Write(s);
-            WriteLine("Введите новое расположение файла");
-            s = ReadLine();
-            bw.Write(s);
+            if (s.Length < 2) return false;
+            bw.Write(s[0]);
+            bw.Write(s[1]);
             socket.Send(ms_buf);
             socket.Receive(ms_buf);
             WriteLine(br.ReadString());
             return true;
         }
-        public bool PackageRename(string s)
+        public bool PackageRename(string[] s)
         {
-            bw.Write(s);
-            WriteLine("Введите новое имя файла");
-            s = ReadLine();
-            bw.Write(s);
+            if (s.Length < 2) return false;
+            bw.Write(s[0]);
+            bw.Write(s[1]);
             socket.Send(ms_buf);
             socket.Receive(ms_buf);
             WriteLine(br.ReadString());
