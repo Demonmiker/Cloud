@@ -40,7 +40,7 @@ namespace ClientServerLibrary
                 bw.Write(buf);
                 FS.Close();
             }
-            catch { return false; }
+            catch(Exception E) { return false; }
             return true;
         }
 
@@ -51,5 +51,19 @@ namespace ClientServerLibrary
             catch {  return false; }
             return true;
         }
+
+        public static long FileSize(string path)
+        {
+            try
+            {
+                return new FileInfo(path).Length;
+            }
+            catch
+            {
+                return -1L;
+            }
+        }
+
+
     }
 }

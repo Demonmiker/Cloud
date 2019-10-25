@@ -14,10 +14,12 @@ namespace ClientServerLibrary
     public partial class Server
     {
         Socket socket = new Socket(AddressFamily.InterNetwork,SocketType.Stream, ProtocolType.Tcp);
-        Byte[] ms_buf = new Byte[10000000];
+        Byte[] ms_buf = new Byte[108000];
         MemoryStream ms;
         BinaryReader br;
         BinaryWriter bw;
+
+        NetBuffer FNB = new NetBuffer();
 
         public void Start(int port)
         {
@@ -116,22 +118,23 @@ namespace ClientServerLibrary
 
         void HandleSave()
         {
-            string path = br.ReadString();
-            if (path == string.Empty)
-                path = "ServerData";
-            else
-                path = "ServerData/" + path;
-            if(Utils.SaveFile(br,path))
+            long filesize = br.ReadInt64();
+            FNB.Init(filesize+10000);
+            bw.Write(true);
+            cs.Send(ms_buf);
+            cs.Receive(FNB.Ms_Buf);
+            string path = SD(FNB.Br.ReadString());
+            if (path == SD("<error>")) return;
+            if (Utils.SaveFile(FNB.Br, path))
             {
-                bw.Write("Файл сохранен");
-                cs.Send(ms_buf);
+                bw.Write("File Saved");
             }
             else
-            {
-                bw.Write("Файл не сохранен");
-                cs.Send(ms_buf);
-            }
-            
+                bw.Write("File Save Error");
+            cs.Send(ms_buf);
+
+
+
         }
 
         void HandleLoad()
@@ -153,6 +156,13 @@ namespace ClientServerLibrary
             
         }
         #endregion
+
+
+        private string SD(string _path)
+        {
+            if (_path == string.Empty) return "ServerData";
+            else return "ServerData/" + _path; 
+        }
 
         public void Stop()
         {

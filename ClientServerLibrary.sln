@@ -7,8 +7,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "ClientServerLibrary", "Clie
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DebugCore", "DebugCore\DebugCore.csproj", "{0BF1FE79-D4B2-4F57-B577-CAEA82ED1F8C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DebugFrame", "DebugFrame\DebugFrame.csproj", "{67BA9A7E-B13C-48E1-8044-C77B3D2D5723}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -23,10 +21,6 @@ Global
 		{0BF1FE79-D4B2-4F57-B577-CAEA82ED1F8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{0BF1FE79-D4B2-4F57-B577-CAEA82ED1F8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{0BF1FE79-D4B2-4F57-B577-CAEA82ED1F8C}.Release|Any CPU.Build.0 = Release|Any CPU
-		{67BA9A7E-B13C-48E1-8044-C77B3D2D5723}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{67BA9A7E-B13C-48E1-8044-C77B3D2D5723}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{67BA9A7E-B13C-48E1-8044-C77B3D2D5723}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{67BA9A7E-B13C-48E1-8044-C77B3D2D5723}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

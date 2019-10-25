@@ -14,10 +14,12 @@ namespace ClientServerLibrary
     {
         public Socket socket = new Socket(AddressFamily.InterNetwork,
           SocketType.Stream, ProtocolType.Tcp);
-        Byte[] ms_buf = new Byte[10000000];
+        Byte[] ms_buf = new Byte[108000];
         public MemoryStream ms;
         public BinaryWriter bw;
         public BinaryReader br;
+
+        public NetBuffer FNB = new NetBuffer();
 
         public Client()
         {
@@ -50,7 +52,7 @@ namespace ClientServerLibrary
         public void Send(Command cmd, string[] param)
         {
             ms.SetLength(0);
-            ms.SetLength(10000000);
+            ms.SetLength(108000);
             bw.Write((int)cmd);
             switch (cmd)
             {
@@ -105,24 +107,31 @@ namespace ClientServerLibrary
 
         public bool PackageSave(string[] s)
         {
-            if(s.Length<2)
-                bw.Write(string.Empty);
-            else
-                bw.Write(s[1]);
-            if (Utils.LoadFile(bw, s[0]))
+            long filesize = Utils.FileSize(s[0]);
+            if (filesize == -1) return false; 
+            bw.Write(filesize);
+            socket.Send(ms_buf);
+            socket.Receive(ms_buf);
+            if(br.ReadBoolean())
             {
-                
-                socket.Send(ms_buf);
-                //
-                socket.Receive(ms_buf);
-                WriteLine(br.ReadString());
+                FNB.Init(filesize + 10000);
+                FNB.Bw.Write(s[1]);
+                if(Utils.LoadFile(FNB.Bw, s[0]))
+                {
+                    socket.Send(FNB.Ms_Buf);
+                    socket.Receive(ms_buf);
+                    WriteLine(br.ReadString());
+                }
+                else
+                {
+                    ms.Position = 0;
+                    bw.Write("<error>");
+                    socket.Send(ms_buf);
+                    return false;
+                }
                 return true;
             }
-            else
-            {
-                WriteLine("Ну далось найти файл");
-                return false;
-            }
+            return false;
             
         }
 
