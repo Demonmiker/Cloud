@@ -18,9 +18,14 @@ namespace ClientServerLibrary
         MemoryStream ms;
         BinaryReader br;
         BinaryWriter bw;
+        public Config config = new Config();
 
         NetBuffer FNB = new NetBuffer();
 
+        /// <summary>
+        /// Перегруженый метод <see cref = "Start(int)"/> для запуска по заданому порту
+        /// </summary>
+        /// <param name="port"></param>
         public void Start(int port)
         {
             ms = new MemoryStream(ms_buf);
@@ -31,6 +36,23 @@ namespace ClientServerLibrary
             
             FindClient();
            
+        }
+
+        /// <summary>
+        /// Перегруженый метод <see cref = "Start()"/> для запуска по данным
+        /// из файла <see cref = "Config"/>.json
+        /// </summary>
+        public void Start()
+        {
+            ms = new MemoryStream(ms_buf);
+            br = new BinaryReader(ms);
+            bw = new BinaryWriter(ms);
+            config = Config.Load();
+            socket.Bind(new IPEndPoint(IPAddress.Any, config.Port_Number));
+            socket.Listen(7);
+
+            FindClient();
+
         }
 
         Socket cs;
@@ -96,17 +118,17 @@ namespace ClientServerLibrary
         }
         public void HandleSearch()
         {
-            string path = br.ReadString();
-            if (path == string.Empty)
+            String path = br.ReadString();
+            if (path == String.Empty)
                 path = "ServerData";
             else
                 path = "ServerData/" + path;
             StringBuilder sb = new StringBuilder(32);
-            foreach(string s in Directory.EnumerateDirectories(path))
+            foreach(String s in Directory.EnumerateDirectories(path))
             {
                 sb.Append("D:" + s.Replace(path + '\\', "") + "?");
             }
-            foreach (string s in Directory.EnumerateFiles(path))
+            foreach (String s in Directory.EnumerateFiles(path))
             {
                 sb.Append("F:" + s.Replace(path + "\\","") + "?");
             }
@@ -123,7 +145,7 @@ namespace ClientServerLibrary
             bw.Write(true);
             cs.Send(ms_buf);
             cs.Receive(FNB.Ms_Buf);
-            string path = SD(FNB.Br.ReadString());
+            String path = SD(FNB.Br.ReadString());
             if (path == SD("<error>")) return;
             if (Utils.SaveFile(FNB.Br, path))
             {
@@ -139,7 +161,7 @@ namespace ClientServerLibrary
 
         void HandleLoad()
         {
-            string path = br.ReadString();
+            String path = br.ReadString();
             path = "ServerData/" + path;
             if (Utils.CheckFile(path))
             {
@@ -158,9 +180,9 @@ namespace ClientServerLibrary
         #endregion
 
 
-        private string SD(string _path)
+        private String SD(String _path)
         {
-            if (_path == string.Empty) return "ServerData";
+            if (_path == String.Empty) return "ServerData";
             else return "ServerData/" + _path; 
         }
 

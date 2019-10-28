@@ -12,7 +12,7 @@ namespace ClientServerLibrary
         {
             FileInfo FI = null;
             DirectoryInfo DI = null;
-            string path = br.ReadString();
+            String path = br.ReadString();
             path = "ServerData/" + path;
             if (path.Contains('.')) FI = new FileInfo(path);
             else DI = new DirectoryInfo(path);
@@ -35,7 +35,7 @@ namespace ClientServerLibrary
         {
             FileInfo FI = null;
             DirectoryInfo DI = null;
-            string path = br.ReadString();
+            String path = br.ReadString();
             path = "ServerData/" + path;
             if (path.Contains('.')) FI = new FileInfo(path);
             else DI = new DirectoryInfo(path);
@@ -58,7 +58,7 @@ namespace ClientServerLibrary
         {
             FileInfo FI = null;
             DirectoryInfo DI = null;
-            string path = br.ReadString();
+            String path = br.ReadString();
             path = "ServerData/" + path;
             if (path.Contains('.')) FI = new FileInfo(path);
             else DI = new DirectoryInfo(path);

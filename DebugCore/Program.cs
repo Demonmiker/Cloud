@@ -10,39 +10,57 @@ namespace ClientServerTest
 {
     class Program
     {
-        static string[] Commands;
-        static void Main(string[] args)
+        static String[] Commands;
+        static void Main(String[] args)
         {
+            //String IP;
+            //int Port;
             Console.WriteLine(Environment.CurrentDirectory);
             Commands = Enum.GetNames(typeof(Command));
             Console.Title = "c/s";
+
+            #region Server
             if (ReadLine() == "s")
             {
                 Console.Title = "Server";
                 Server s = new Server();
-                Write("Port:");
-                int.TryParse(ReadLine(), out int port);
-                s.Start(port);
+                int port = 0;
+                try { s.Start(); }
+                catch
+                {
+                    Write("Port:");
+                    int.TryParse(ReadLine(), out port);
+                    s.config.Port_Number = port;
+                    s.Start();
+                }
             }
+            #endregion Server
+
+            #region Client
             else
             {
                 Console.Title = "Client";
                 Client c = new Client();
-                Write("IP:");
-                string Ip = ReadLine();
-                if (Ip == "l")
-                    Ip = "127.0.0.1";
-                Write("Port:");
-                int.TryParse(ReadLine(), out int port);
-                if (c.Connect(Ip, port))
+                if (!c.LoadFromConfig())
+                {
+                    Write("IP:");
+                    String Ip = ReadLine();
+                    if (Ip == "l")
+                        Ip = "127.0.0.1";
+                    Write("Port:");
+                    int.TryParse(ReadLine(), out int Port);
+                    c.config.IP_Adress = Ip;
+                    c.config.Port_Number = Port;
+                }
+                if (c.Connect())
                 {
                     Console.WriteLine("Подключился");
                     while (true)
                     {
                         int CmdCode = 0;
                         WriteLine("cmd");
-                        string cmd = ReadLine();
-                        string[] buf = cmd.Split(new char[] { '>' }, StringSplitOptions.RemoveEmptyEntries);
+                        String cmd = ReadLine();
+                        String[] buf = cmd.Split(new char[] { '>' }, StringSplitOptions.RemoveEmptyEntries);
 
                         if (!int.TryParse(buf[0], out CmdCode))
                         {
@@ -55,7 +73,7 @@ namespace ClientServerTest
                             }
                         }
                         if (buf.Length < 2)
-                            c.Send((Command)CmdCode, string.Empty);
+                            c.Send((Command)CmdCode, String.Empty);
                         else
                             c.Send((Command)CmdCode, buf[1]);
                     }
@@ -65,6 +83,7 @@ namespace ClientServerTest
                     Console.WriteLine("Подключение не получилос");
                 }
             }
+            #endregion Client
             ReadKey();
         }
     }

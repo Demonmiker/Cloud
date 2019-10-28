@@ -9,11 +9,11 @@ namespace ClientServerLibrary
 {
     public static class Utils
     {
-        public static bool SaveFile(BinaryReader br,string path)
+        public static Boolean SaveFile(BinaryReader br,String path)
         {
             try
             {
-                string Name = br.ReadString();
+                String Name = br.ReadString();
                 int Length = (int)br.ReadInt64();
                 Byte[] buf = br.ReadBytes(Length);
                 FileStream FS = new FileStream(path + "/" + Name, FileMode.Create);
@@ -25,7 +25,7 @@ namespace ClientServerLibrary
             return true;
         }
 
-        public static bool LoadFile(BinaryWriter bw,string path)
+        public static Boolean LoadFile(BinaryWriter bw,String path)
         {
             try
             {
@@ -45,14 +45,14 @@ namespace ClientServerLibrary
         }
 
 
-        public static bool CheckFile(string path)
+        public static Boolean CheckFile(String path)
         {
             try { FileStream FS = new FileStream(path, FileMode.Open);FS.Close(); }
             catch {  return false; }
             return true;
         }
 
-        public static long FileSize(string path)
+        public static long FileSize(String path)
         {
             try
             {

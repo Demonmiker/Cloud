@@ -18,6 +18,7 @@ namespace ClientServerLibrary
         public MemoryStream ms;
         public BinaryWriter bw;
         public BinaryReader br;
+        public Config config = new Config();
 
         public NetBuffer FNB = new NetBuffer();
 
@@ -28,7 +29,24 @@ namespace ClientServerLibrary
             br = new BinaryReader(ms);
         }
 
-        public bool Connect(String IP_Adress, int Port_Number)
+        public Boolean LoadFromConfig()
+        {
+            try
+            {
+                config = Config.Load();
+                return true;
+            }
+            catch { return false; }
+        }
+
+        /// <summary>
+        /// Перегрузка метода <see cref = "Connect(String, int)"/> для подключения по данным,
+        /// которые ввёл пользователь
+        /// </summary>
+        /// <param name="IP_Adress"></param>
+        /// <param name="Port_Number"></param>
+        /// <returns></returns>
+        public Boolean Connect(String IP_Adress, int Port_Number)
         {
             try
             {
@@ -39,17 +57,32 @@ namespace ClientServerLibrary
             
         }
 
+        /// <summary>
+        /// Перегрузка метода <see cref = "Connect()"/> для подключения по данным
+        /// из файла <see cref = "Config"/>.json
+        /// </summary>
+        /// <returns></returns>
+        public Boolean Connect()
+        {
+            try
+            {
+                socket.Connect(config.IP_Adress, config.Port_Number);
+                return true;
+            }
+            catch { return false; }
+        }
+
         public void Close()
         {
             socket.Close();
         }
 
-        public void Send(Command cmd, string s)
+        public void Send(Command cmd, String s)
         {
             Send(cmd, s.Split('*'));
         }
 
-        public void Send(Command cmd, string[] param)
+        public void Send(Command cmd, String[] param)
         {
             ms.SetLength(0);
             ms.SetLength(108000);
@@ -81,7 +114,7 @@ namespace ClientServerLibrary
         }
 
         #region Packages
-        public bool PackageMessage(string[] s)
+        public Boolean PackageMessage(String[] s)
         {
             if (s.Length < 1) return false;
             bw.Write(s[0]);
@@ -92,20 +125,20 @@ namespace ClientServerLibrary
             return true;
         }
 
-        public bool PackageSearch(string[] s)
+        public Boolean PackageSearch(String[] s)
         {
             if (s.Length < 1) return false;
             bw.Write(s[0]);
             socket.Send(ms_buf);
             //
             socket.Receive(ms_buf);
-            string str = br.ReadString();
+            String str = br.ReadString();
             str = str.Replace("?", Environment.NewLine);
             WriteLine(str);
             return true;
         }
 
-        public bool PackageSave(string[] s)
+        public Boolean PackageSave(String[] s)
         {
             long filesize = Utils.FileSize(s[0]);
             if (filesize == -1) return false; 
@@ -135,7 +168,7 @@ namespace ClientServerLibrary
             
         }
 
-        public bool PackageLoad(string[] s)
+        public Boolean PackageLoad(String[] s)
         {
             if (s.Length < 1) return false;
             bw.Write(s[0]);
