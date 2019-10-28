@@ -38,7 +38,7 @@ namespace ClientServerLibrary
         /// </summary>
         public void Start()
         {
-            CNB.Init(10000);
+            CNB.Init(100000);
             config = Config.Load();
             socket.Bind(new IPEndPoint(IPAddress.Any, config.Port_Number));
             socket.Listen(7);
@@ -57,18 +57,20 @@ namespace ClientServerLibrary
       
         private void HandleClient()
         {
-            try
+           
+            WriteLine("Нашел клиента");
+            while (true)
             {
-                WriteLine("Нашел клиента");
-                while (true)
+                try
                 {
                     cs.Receive(CNB.Ms_Buf);
                     CNB.Ms.Position = 0;
                     int cmd = CNB.Br.ReadInt32();
                     HandleReceive((Command)cmd);
                 }
+                catch (Exception E) { WriteLine(E.Message); cs.Close(); FindClient(); };
             }
-            catch (Exception E) { WriteLine(E.Message); cs.Close(); FindClient(); };
+
         }
 
         private void HandleReceive(Command cmd)
@@ -202,7 +204,7 @@ namespace ClientServerLibrary
             else DI = new DirectoryInfo(path);
             if (FI != null) try
                 {
-                    FI.MoveTo(SD($"{CNB.Br.ReadString()}{FI.Name}"));
+                    FI.MoveTo(SD($"{CNB.Br.ReadString()}/{FI.Name}"));
                     CNB.Bw.Write("Файл успешно перемещён");
                 }
                 catch (Exception E) { CNB.Bw.Write($"Не удалось переместить файл - {E.Message}"); }
