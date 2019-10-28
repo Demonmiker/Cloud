@@ -7,7 +7,7 @@ namespace ClientServerLibrary
 {
     public class NetBuffer
     {
-        public MemoryStream Ms;
+        MemoryStream Ms;
         public byte[] Ms_Buf;
         public BinaryReader Br;
         public BinaryWriter Bw;
@@ -22,7 +22,6 @@ namespace ClientServerLibrary
         {
             size = _size;
             Ms_Buf = new byte[size];
-
             Ms = new MemoryStream(Ms_Buf);
             Br = new BinaryReader(Ms);
             Bw = new BinaryWriter(Ms);
