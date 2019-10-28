@@ -31,6 +31,7 @@ namespace ClientServerTest
                     Write("Port:");
                     int.TryParse(ReadLine(), out port);
                     s.config.Port_Number = port;
+                    s.config.Save();
                     s.Start();
                 }
             }
@@ -51,6 +52,7 @@ namespace ClientServerTest
                     int.TryParse(ReadLine(), out int Port);
                     c.config.IP_Adress = Ip;
                     c.config.Port_Number = Port;
+                    c.config.Save();
                 }
                 if (c.Connect())
                 {

@@ -39,7 +39,6 @@ namespace ClientServerLibrary
         public void Save()
         {
             JsonSerializer JS = new JsonSerializer();
-            Console.WriteLine("Введите имя файла");
             StreamWriter SW = new StreamWriter($"Config.json", false);
             try { JS.Serialize(SW, this); }
             catch (Exception E) { Console.WriteLine($"Ошибка: {E.Message}"); }
