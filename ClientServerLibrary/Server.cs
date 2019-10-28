@@ -26,7 +26,7 @@ namespace ClientServerLibrary
             ms = new MemoryStream(ms_buf);
             br = new BinaryReader(ms);
             bw = new BinaryWriter(ms);
-            socket.Bind(new IPEndPoint(IPAddress.Any, 907));
+            socket.Bind(new IPEndPoint(IPAddress.Any, port));
             socket.Listen(7);
             
             FindClient();
