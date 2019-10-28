@@ -14,19 +14,14 @@ namespace ClientServerLibrary
     {
         public Socket socket = new Socket(AddressFamily.InterNetwork,
           SocketType.Stream, ProtocolType.Tcp);
-        Byte[] ms_buf = new Byte[108000];
-        public MemoryStream ms;
-        public BinaryWriter bw;
-        public BinaryReader br;
+        NetBuffer CNB = new NetBuffer();
         public Config config = new Config();
 
         public NetBuffer FNB = new NetBuffer();
 
         public Client()
         {
-            ms = new MemoryStream(ms_buf);
-            bw = new BinaryWriter(ms);
-            br = new BinaryReader(ms);
+            CNB.Init(100000);
         }
 
         public Boolean LoadFromConfig()
@@ -84,9 +79,8 @@ namespace ClientServerLibrary
 
         public void Send(Command cmd, String[] param)
         {
-            ms.SetLength(0);
-            ms.SetLength(108000);
-            bw.Write((int)cmd);
+            CNB.Clear();
+            CNB.Bw.Write((int)cmd);
             switch (cmd)
             {
                 case Command.Message:
@@ -117,22 +111,22 @@ namespace ClientServerLibrary
         public Boolean PackageMessage(String[] s)
         {
             if (s.Length < 1) return false;
-            bw.Write(s[0]);
-            socket.Send(ms_buf);
+            CNB.Bw.Write(s[0]);
+            socket.Send(CNB.Ms_Buf);
             //
-            socket.Receive(ms_buf);
-            WriteLine(br.ReadString());
+            socket.Receive(CNB.Ms_Buf);
+            WriteLine(CNB.Br.ReadString());
             return true;
         }
 
         public Boolean PackageSearch(String[] s)
         {
             if (s.Length < 1) return false;
-            bw.Write(s[0]);
-            socket.Send(ms_buf);
+            CNB.Bw.Write(s[0]);
+            socket.Send(CNB.Ms_Buf);
             //
-            socket.Receive(ms_buf);
-            String str = br.ReadString();
+            socket.Receive(CNB.Ms_Buf);
+            String str = CNB.Br.ReadString();
             str = str.Replace("?", Environment.NewLine);
             WriteLine(str);
             return true;
@@ -142,24 +136,24 @@ namespace ClientServerLibrary
         {
             long filesize = Utils.FileSize(s[0]);
             if (filesize == -1) return false; 
-            bw.Write(filesize);
-            socket.Send(ms_buf);
-            socket.Receive(ms_buf);
-            if(br.ReadBoolean())
+            CNB.Bw.Write(filesize);
+            socket.Send(CNB.Ms_Buf);
+            socket.Receive(CNB.Ms_Buf);
+            if(CNB.Br.ReadBoolean())
             {
                 FNB.Init(filesize + 10000);
                 FNB.Bw.Write(s[1]);
                 if(Utils.LoadFile(FNB.Bw, s[0]))
                 {
                     socket.Send(FNB.Ms_Buf);
-                    socket.Receive(ms_buf);
-                    WriteLine(br.ReadString());
+                    socket.Receive(CNB.Ms_Buf);
+                    WriteLine(CNB.Br.ReadString());
                 }
                 else
                 {
-                    ms.Position = 0;
-                    bw.Write("<error>");
-                    socket.Send(ms_buf);
+                    CNB.Ms.Position = 0;
+                    CNB.Bw.Write("<error>");
+                    socket.Send(CNB.Ms_Buf);
                     return false;
                 }
                 return true;
@@ -171,22 +165,53 @@ namespace ClientServerLibrary
         public Boolean PackageLoad(String[] s)
         {
             if (s.Length < 1) return false;
-            bw.Write(s[0]);
-            socket.Send(ms_buf);
+            CNB.Bw.Write(s[0]);
+            socket.Send(CNB.Ms_Buf);
             //
-            socket.Receive(ms_buf);
-            if(br.ReadInt32()==0)
+            socket.Receive(CNB.Ms_Buf);
+            if(CNB.Br.ReadInt32()==0)
             {
                 Console.WriteLine("Куда скачивать?:");
-                if (!Utils.SaveFile(br, ReadLine()))
+                if (!Utils.SaveFile(CNB.Br, ReadLine()))
                     WriteLine("Файл не сохранен");
             }
             else
             {
-                Console.WriteLine(br.ReadString());
+                Console.WriteLine(CNB.Br.ReadString());
             }
             return true;
 
+        }
+
+        public bool PackageDelete(string[] s)
+        {
+            if (s.Length < 1) return false;
+            CNB.Bw.Write(s[0]);
+            socket.Send(CNB.Ms_Buf);
+            socket.Receive(CNB.Ms_Buf);
+            WriteLine(CNB.Br.ReadString());
+            return true;
+        }
+
+        public bool PackageMove(string[] s)
+        {
+            if (s.Length < 2) return false;
+            CNB.Bw.Write(s[0]);
+            CNB.Bw.Write(s[1]);
+            socket.Send(CNB.Ms_Buf);
+            socket.Receive(CNB.Ms_Buf);
+            WriteLine(CNB.Br.ReadString());
+            return true;
+        }
+        public bool PackageRename(string[] s)
+        {
+            if (s.Length < 2) return false;
+            CNB.Bw.Write(s[0]);
+            CNB.Bw.Write(s[1]);
+            socket.Send(CNB.Ms_Buf);
+            socket.Receive(CNB.Ms_Buf);
+            WriteLine(CNB.Br.ReadString());
+            return true;
         }
         #endregion
 
