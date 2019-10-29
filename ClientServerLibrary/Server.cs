@@ -7,6 +7,8 @@ using System.Net;
 using System.Net.Sockets;
 using System.IO;
 using static System.Console;
+using ClientServerLibrary.Logger;
+
 
 namespace ClientServerLibrary
 {
@@ -20,15 +22,19 @@ namespace ClientServerLibrary
         NetBuffer CNB = new NetBuffer();
         NetBuffer FNB = new NetBuffer();
 
+        ILogger log = new ConsoleLogger();
+
         /// <summary>
         /// Перегруженый метод <see cref = "Start(int)"/> для запуска по заданому порту
         /// </summary>
         /// <param name="port"></param>
         public void Start(int port)
         {
+            log.WriteLine("Инициализация");
             CNB.Init(100000);
             socket.Bind(new IPEndPoint(IPAddress.Any, port));
             socket.Listen(7);
+            log.WriteLine("Сервер включен");
             FindClient();
         }
 
@@ -38,10 +44,12 @@ namespace ClientServerLibrary
         /// </summary>
         public void Start()
         {
+            log.WriteLine("Инициализация");
             CNB.Init(100000);
             config = Config.Load();
             socket.Bind(new IPEndPoint(IPAddress.Any, config.Port_Number));
             socket.Listen(7);
+            log.WriteLine("Сервер включен");
             FindClient();
 
         }
@@ -49,7 +57,7 @@ namespace ClientServerLibrary
         Socket cs;
         public void FindClient()
         {
-            WriteLine("Ищу клиента");
+            log.WriteLine("Ищу клиента");
             cs = socket.Accept();
             HandleClient();
         }
@@ -58,7 +66,7 @@ namespace ClientServerLibrary
         private void HandleClient()
         {
            
-            WriteLine("Нашел клиента");
+            log.WriteLine("Нашел клиента");
             while (true)
             {
                 try
@@ -104,49 +112,68 @@ namespace ClientServerLibrary
         #region Handlers
         void HandleMessage()
         {
-            WriteLine(CNB.Br.ReadString());
-            CNB.Bw.Write("Сообщение получено");
+            log.Write("Сообщение: ");
+            log.Write(CNB.Br.ReadString());
+            CNB.Bw.Write("Сообщение получено");//клиенту
             cs.Send(CNB.Ms_Buf);
-           
+            log.WriteLine("!");
+
         }
         public void HandleSearch()
         {
+            log.Write("Поиск: ");
             String path = CNB.Br.ReadString();
-            if (path == String.Empty)
-                path = "ServerData";
-            else
-                path = "ServerData/" + path;
+            path = SD(path);
+            log.WriteLine(path);
             StringBuilder sb = new StringBuilder(32);
-            foreach(String s in Directory.EnumerateDirectories(path))
+            if(!Directory.Exists(path))
             {
-                sb.Append("D:" + s.Replace(path + '\\', "") + "?");
+                CNB.Bw.Write("Папка не найдена");
+                cs.Send(CNB.Ms_Buf);
             }
-            foreach (String s in Directory.EnumerateFiles(path))
+            else
             {
-                sb.Append("F:" + s.Replace(path + "\\","") + "?");
+                foreach (String s in Directory.EnumerateDirectories(path))
+                {
+                    sb.Append("D:" + s.Replace(path + '\\', "") + "?");
+                }
+                foreach (String s in Directory.EnumerateFiles(path))
+                {
+                    sb.Append("F:" + s.Replace(path + "\\", "") + "?");
+                }
+                CNB.Bw.Write(sb.ToString());//клиенту
+                cs.Send(CNB.Ms_Buf);
             }
-            CNB.Bw.Write(sb.ToString());
-            cs.Send(CNB.Ms_Buf);
+           
+            log.WriteLine("!");
         }
 
 
 
         void HandleSave()
         {
+            log.Write("Сохранение: ");
             long filesize = CNB.Br.ReadInt64();
             FNB.Init(filesize+10000);
             CNB.Bw.Write(true);
             cs.Send(CNB.Ms_Buf);
             cs.Receive(FNB.Ms_Buf);
             String path = SD(FNB.Br.ReadString());
-            if (path == SD("<error>")) return;
+            if (path == SD("<error>")) { log.WriteLine("ошибка у клиента");  return; }
+            log.Write(path);
             if (Utils.SaveFile(FNB.Br, path))
             {
-                CNB.Bw.Write("File Saved");
+                log.Write(" сохранен");
+                CNB.Bw.Write("Файл сохранен");//клиенту
             }
             else
-                CNB.Bw.Write("File Save Error");
+            {
+                log.Write(" не сохранен");
+                CNB.Bw.Write("Файл не сохранен");//клиенту
+            }
+                
             cs.Send(CNB.Ms_Buf);
+            log.WriteLine("!");
 
 
 
@@ -154,6 +181,7 @@ namespace ClientServerLibrary
 
         void HandleLoad()
         {
+            log.Write("Загрузка: ");
             string path = SD(CNB.Br.ReadString());
             long size = Utils.FileSize(path);
             CNB.Bw.Write(size);
@@ -164,75 +192,94 @@ namespace ClientServerLibrary
             {
                 cs.Send(FNB.Ms_Buf);
             }
+            log.WriteLine("!");
         }
 
         void HandleDelete()
         {
+            log.Write("Удаление: ");
             FileInfo FI = null;
             DirectoryInfo DI = null;
             String path = CNB.Br.ReadString();
             path = "ServerData/" + path;
+            log.Write(path);
+            string answer = "@@@";
             if (path.Contains('.')) FI = new FileInfo(path);
             else DI = new DirectoryInfo(path);
             if (FI != null) try
                 {
                     FI.Delete();
-                    CNB.Bw.Write("Файл успешно удалён");
+                    answer= "Файл успешно удалён";
                 }
-                catch (Exception E) { CNB.Bw.Write($"Не удалось переместить файл - {E.Message}"); }
+                catch (Exception E) { answer= $"Не удалось переместить файл - {E.Message}"; }
             else try
                 {
                     DI.Delete();
-                    CNB.Bw.Write("Директория успешно удалена");
+                    answer = "Директория успешно удалена";
                 }
-                catch (Exception E) { CNB.Bw.Write($"Не удалось переместить директорию - {E.Message}"); }
+                catch (Exception E) { answer= $"Не удалось переместить директорию - {E.Message}"; }
+            log.Write(answer);
+            CNB.Bw.Write(answer);
             cs.Send(CNB.Ms_Buf);
+            log.WriteLine("!");
         }
 
         void HandleMove()
         {
+            log.Write("Перемещение: ");
             FileInfo FI = null;
             DirectoryInfo DI = null;
             String path = CNB.Br.ReadString();
             path = "ServerData/" + path;
+            string answer = "###";
             if (path.Contains('.')) FI = new FileInfo(path);
             else DI = new DirectoryInfo(path);
             if (FI != null) try
                 {
                     FI.MoveTo(SD($"{CNB.Br.ReadString()}/{FI.Name}"));
-                    CNB.Bw.Write("Файл успешно перемещён");
+                    answer = "Файл успешно перемещён";
                 }
-                catch (Exception E) { CNB.Bw.Write($"Не удалось переместить файл - {E.Message}"); }
+                catch (Exception E) { answer = $"Не удалось переместить файл - {E.Message}"; }
             else try
                 {
                     DI.MoveTo(SD($"{CNB.Br.ReadString()}/{DI.Name}"));
-                    CNB.Bw.Write("Директория успешно перемещена");
+                    answer = "Директория успешно перемещена";
                 }
-                catch (Exception E) { CNB.Bw.Write($"Не удалось переместить директорию - {E.Message}"); }
+                catch (Exception E) {answer = $"Не удалось переместить директорию - {E.Message}"; }
+            log.Write(answer);
+            CNB.Bw.Write(answer);
             cs.Send(CNB.Ms_Buf);
+            log.WriteLine("!");
         }
 
         void HandleRename()
         {
+            log.Write("Перемещение: ");
             FileInfo FI = null;
             DirectoryInfo DI = null;
             String path = CNB.Br.ReadString();
             path = "ServerData/" + path;
+            log.Write(path);
+            string answer = "$$$";
+            string To = CNB.Br.ReadString();
+            log.Write(" " + To);
             if (path.Contains('.')) FI = new FileInfo(path);
             else DI = new DirectoryInfo(path);
             if (FI != null) try
                 {
-                    FI.MoveTo($"{(FI.DirectoryName == "ServerData" ? "" : FI.DirectoryName)}/{CNB.Br.ReadString()}");
-                    CNB.Bw.Write("Файл успешно переименован");
+                    FI.MoveTo($"{(FI.DirectoryName == "ServerData" ? "" : FI.DirectoryName)}/{To}");
+                    answer = "Файл успешно переименован";
                 }
-                catch (Exception E) { CNB.Bw.Write($"Не удалось переименовать файл - {E.Message}"); }
+                catch (Exception E) { answer = $"Не удалось переименовать файл - {E.Message}"; }
             else try
                 {
-                    DI.MoveTo($"{DI.Parent.Name}/{CNB.Br.ReadString()}");
-                    CNB.Bw.Write("Директория успешно переименована");
+                    DI.MoveTo($"{DI.Parent.Name}/{To}");
+                    answer = "Директория успешно переименована";
                 }
-                catch (Exception E) { CNB.Bw.Write($"Не удалось переименовать директорию - {E.Message}"); }
+                catch (Exception E) { answer=$"Не удалось переименовать директорию - {E.Message}"; }
+            CNB.Bw.Write(answer);
             cs.Send(CNB.Ms_Buf);
+            log.WriteLine("!");
         }
         #endregion
 

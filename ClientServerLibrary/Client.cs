@@ -164,7 +164,7 @@ namespace ClientServerLibrary
 
         public Boolean PackageLoad(String[] s)
         {
-           
+            if (s.Length < 2) return false;
             CNB.Bw.Write(s[0]);
             socket.Send(CNB.Ms_Buf);
             socket.Receive(CNB.Ms_Buf);

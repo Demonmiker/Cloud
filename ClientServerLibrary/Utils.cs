@@ -18,7 +18,7 @@ namespace ClientServerLibrary
                 Byte[] buf = br.ReadBytes(Length);
                 FileStream FS = new FileStream(path + "/" + Name, FileMode.Create);
                 FS.Write(buf, 0, Length);
-                Console.WriteLine("Файл успешно сохранён");
+                //Console.WriteLine("Файл успешно сохранён");
                 FS.Close();
             }
             catch { return false; }
