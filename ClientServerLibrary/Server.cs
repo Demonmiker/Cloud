@@ -154,21 +154,16 @@ namespace ClientServerLibrary
 
         void HandleLoad()
         {
-            String path = CNB.Br.ReadString();
-            path = "ServerData/" + path;
-            if (Utils.CheckFile(path))
+            string path = SD(CNB.Br.ReadString());
+            long size = Utils.FileSize(path);
+            CNB.Bw.Write(size);
+            cs.Send(CNB.Ms_Buf);
+            if (size == -1) return;
+            FNB.Init(size + 10000);
+            if (Utils.LoadFile(FNB.Bw, path))
             {
-                CNB.Bw.Write(0);
-                Utils.LoadFile(CNB.Bw, path);
-                cs.Send(CNB.Ms_Buf);
+                cs.Send(FNB.Ms_Buf);
             }
-            else
-            {
-                CNB.Bw.Write(1);
-                CNB.Bw.Write("Не удалось получить файл");
-                cs.Send(CNB.Ms_Buf);
-            }
-            
         }
 
         void HandleDelete()

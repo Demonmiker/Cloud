@@ -164,22 +164,25 @@ namespace ClientServerLibrary
 
         public Boolean PackageLoad(String[] s)
         {
-            if (s.Length < 1) return false;
+           
             CNB.Bw.Write(s[0]);
             socket.Send(CNB.Ms_Buf);
-            //
             socket.Receive(CNB.Ms_Buf);
-            if(CNB.Br.ReadInt32()==0)
+            long size = CNB.Br.ReadInt64();
+            if (size == -1) return false;
+            FNB.Init(size + 10000);
+            socket.Receive(FNB.Ms_Buf);
+            if (Utils.SaveFile(FNB.Br, s[1]))
             {
-                Console.WriteLine("Куда скачивать?:");
-                if (!Utils.SaveFile(CNB.Br, ReadLine()))
-                    WriteLine("Файл не сохранен");
+                WriteLine("Успешно загружен");
+                return true;
             }
             else
             {
-                Console.WriteLine(CNB.Br.ReadString());
+                WriteLine("Ошибка сохранения");
+                return false;
             }
-            return true;
+
 
         }
 
