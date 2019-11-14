@@ -12,7 +12,6 @@ using ClientServerLibrary.Logger;
 
 namespace ClientServerLibrary
 {
-
     public partial class Server
     {
         #region Поля
@@ -44,8 +43,12 @@ namespace ClientServerLibrary
         ILogger log = new ConsoleLogger();
 
         #region Докачка
-        private class Renew
+        private static class Renew
         {
+            /// <summary>
+            /// Указывает, нужно ли пытаться производить 
+            /// докачку при подключении нового клиента
+            /// </summary>
             public static Boolean Exist;
 
             /// <summary>
@@ -53,7 +56,19 @@ namespace ClientServerLibrary
             /// </summary>
             public static void Start()
             {
+                throw new NotImplementedException();
+            }
 
+            /// <summary>
+            /// Возвращает позицию, на которой прервалась загрузка
+            /// </summary>
+            /// <param name="Mas"></param>
+            /// <returns></returns>
+            public static int GetPosition(Byte[] Mas)
+            {
+                int Position = Mas.Length;
+                while (Mas[Position++] == 0) Position--;
+                return Position;
             }
 
             /// <summary>
@@ -66,19 +81,19 @@ namespace ClientServerLibrary
             /// Команда, выполнение которой было прервано
             /// последним аварийным отключением клиента
             /// </summary>
-            Command ExecCommand;
+            public static Command ExecCommand;
 
             /// <summary>
             /// Путь к файлу, работа с которым была прервана
             /// последним аварийным отключением клиента
             /// </summary>
-            String ExecCommandPath;
+            public static String ExecCommandParam;
 
             /// <summary>
             /// Позиция, до которой клиент успел загрузить представляющий файл
             /// бинарный массив перед последним аварийным отключением
             /// </summary>
-            int BuffPosition;
+            public static int BuffPosition;
         }
         #endregion
         #endregion
@@ -95,7 +110,6 @@ namespace ClientServerLibrary
             socket.Listen(7);
             log.WriteLine("Сервер включен");
             FindClient();
-            Renew.Start();
         }
 
         /// <summary>
@@ -111,7 +125,6 @@ namespace ClientServerLibrary
             socket.Listen(7);
             log.WriteLine("Сервер включен");
             FindClient();
-
         }
 
         Socket cs;
@@ -120,16 +133,26 @@ namespace ClientServerLibrary
             log.WriteLine("Ищу клиента");
             cs = socket.Accept();
             log.WriteLine("Проверяю возможность и необходимость докачки");
+            // Производим докачку если она нужна и таймаут ещё не закончился
             if (Renew.Exist)
+            {
                 if ((DateTime.Now - Renew.ClientLosenTime).TotalSeconds < 35)
                     // в этом месте в последствии "35" нужно будет заменить на
                     // специальный параметр "RenewTimeOut"
                     Renew.Start();
+                else
+                {
+                    log.WriteLine("Время для докачки вышло");
+                    Renew.Exist = false;
+                }
+            }
+            else log.WriteLine("Докачка не нужна");
             HandleClient();
         }
       
         private void HandleClient()
-        {           
+        {
+            int cmd = 0;
             log.WriteLine("Нашел клиента");
             while (true)
             {
@@ -137,15 +160,25 @@ namespace ClientServerLibrary
                 {
                     cs.Receive(CNB.Ms_Buf);
                     CNB.Ms.Position = 0;
-                    int cmd = CNB.Br.ReadInt32();
+                    cmd = CNB.Br.ReadInt32();
                     HandleReceive((Command)cmd);
                 }
                 catch (Exception E)
                 {
                     WriteLine(E.Message);
                     cs.Close();
-                    Renew.ClientLosenTime = DateTime.Now;
-                    Renew.Exist = true;
+                    Command c = (Command)cmd;
+                    // Если что-то пошло не так во время загрузки файла на сервер, то
+                    // устанавливаем сервер в режим ожидания переподключения клиента
+                    if (CNB.Ms_Buf.Length != 0 && c == Command.Save)
+                    {
+                        Renew.ClientLosenTime = DateTime.Now;
+                        Renew.ExecCommand = c;
+                        Renew.ExecCommandParam = CNB.Br.ReadString();
+                        Renew.BuffPosition = Renew.GetPosition(CNB.Ms_Buf);
+                        Renew.Exist = true;
+                    }
+                    // Далее в любом случае начинаем заново ждать подключения
                     FindClient();
                 }
             }
