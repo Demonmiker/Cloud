@@ -15,14 +15,73 @@ namespace ClientServerLibrary
 
     public partial class Server
     {
+        #region Поля
+        /// <summary>
+        /// <see cref="Socket"/>, через который осуществляется подключение
+        /// </summary>
         Socket socket = new Socket(AddressFamily.InterNetwork,SocketType.Stream, ProtocolType.Tcp);
         
+        /// <summary>
+        /// Конфиг сервера
+        /// </summary>
         public Config config = new Config();
 
+        /// <summary>
+        /// <see cref="NetBuffer"/>, в который получаем данные от клиента
+        /// </summary>
         NetBuffer CNB = new NetBuffer();
+
+        /// <summary>
+        /// <see cref="NetBuffer"/>, в который загружаем данные
+        /// для последующей отправки клиенту
+        /// </summary>
         NetBuffer FNB = new NetBuffer();
 
+        /// <summary>
+        /// <see cref="ILogger"/>, выводящий данные в консоль и
+        /// (опционально) .log файл 
+        /// </summary>
         ILogger log = new ConsoleLogger();
+
+        #region Докачка
+        private class Renew
+        {
+            public static Boolean Exist;
+
+            /// <summary>
+            /// Докачка файла
+            /// </summary>
+            public static void Start()
+            {
+
+            }
+
+            /// <summary>
+            /// Время последнего аварийного отключения клиента
+            /// <para/> Нужно для "докачки"
+            /// </summary>
+            public static DateTime ClientLosenTime;
+
+            /// <summary>
+            /// Команда, выполнение которой было прервано
+            /// последним аварийным отключением клиента
+            /// </summary>
+            Command ExecCommand;
+
+            /// <summary>
+            /// Путь к файлу, работа с которым была прервана
+            /// последним аварийным отключением клиента
+            /// </summary>
+            String ExecCommandPath;
+
+            /// <summary>
+            /// Позиция, до которой клиент успел загрузить представляющий файл
+            /// бинарный массив перед последним аварийным отключением
+            /// </summary>
+            int BuffPosition;
+        }
+        #endregion
+        #endregion
 
         /// <summary>
         /// Перегруженый метод <see cref = "Start(int)"/> для запуска по заданому порту
@@ -30,12 +89,13 @@ namespace ClientServerLibrary
         /// <param name="port"></param>
         public void Start(int port)
         {
-            log.WriteLine("Инициализация");
+            log.WriteLine("Инициализация");            
             CNB.Init(100000);
             socket.Bind(new IPEndPoint(IPAddress.Any, port));
             socket.Listen(7);
             log.WriteLine("Сервер включен");
             FindClient();
+            Renew.Start();
         }
 
         /// <summary>
@@ -59,13 +119,17 @@ namespace ClientServerLibrary
         {
             log.WriteLine("Ищу клиента");
             cs = socket.Accept();
+            log.WriteLine("Проверяю возможность и необходимость докачки");
+            if (Renew.Exist)
+                if ((DateTime.Now - Renew.ClientLosenTime).TotalSeconds < 35)
+                    // в этом месте в последствии "35" нужно будет заменить на
+                    // специальный параметр "RenewTimeOut"
+                    Renew.Start();
             HandleClient();
         }
-
       
         private void HandleClient()
-        {
-           
+        {           
             log.WriteLine("Нашел клиента");
             while (true)
             {
@@ -76,9 +140,15 @@ namespace ClientServerLibrary
                     int cmd = CNB.Br.ReadInt32();
                     HandleReceive((Command)cmd);
                 }
-                catch (Exception E) { WriteLine(E.Message); cs.Close(); FindClient(); };
+                catch (Exception E)
+                {
+                    WriteLine(E.Message);
+                    cs.Close();
+                    Renew.ClientLosenTime = DateTime.Now;
+                    Renew.Exist = true;
+                    FindClient();
+                }
             }
-
         }
 
         private void HandleReceive(Command cmd)

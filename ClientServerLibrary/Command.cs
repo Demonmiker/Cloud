@@ -9,6 +9,7 @@
         Delete,
         Rename,
         Move,
-        Search
+        Search,
+        Renew
     }
 }
