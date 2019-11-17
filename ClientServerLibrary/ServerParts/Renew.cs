@@ -30,7 +30,6 @@ namespace ClientServerLibrary
                 CNB.Bw.Write(BuffPosition);
                 log.WriteLine("Клиент начинает докачку");
                 cs.Send(CNB.Ms_Buf);
-                log.WriteLine("Клиент завершил докачку");
             }
 
             /// <summary>

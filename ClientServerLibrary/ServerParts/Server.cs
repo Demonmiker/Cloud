@@ -85,9 +85,14 @@ namespace ClientServerLibrary
             if (Server.Renew.Need)
             {
                 if ((DateTime.Now - Renew.ClientLosenTime).TotalSeconds < 35)
-                    // в этом месте в последствии "35" нужно будет заменить на
-                    // специальный параметр "RenewTimeOut"
-                    Renew.Start();
+                // в этом месте в последствии "35" нужно будет заменить на
+                // специальный параметр "RenewTimeOut"
+                {
+                    Renew.Start(CNB, cs, log);
+                    cs.Receive(CNB.Ms_Buf);
+                    CNB.Ms.Position = 0;
+                    HandleSave();
+                }
                 else
                 {
                     log.WriteLine("Время для докачки вышло");

@@ -78,7 +78,8 @@ namespace ClientServerLibrary
                 //
                 // Докачка
                 //
-
+                String[] Param = new String[2];
+                PackageSave(Param, 0);
                 //
                 // Докачка закончена
                 //
@@ -180,6 +181,36 @@ namespace ClientServerLibrary
             }
             return false;
             
+        }
+
+        public Boolean PackageSave(String[] s, int Position)
+        {
+            long filesize = Utils.FileSize(s[0]);
+            if (filesize == -1) return false;
+            CNB.Bw.Write(filesize);
+            socket.Send(CNB.Ms_Buf);
+            socket.Receive(CNB.Ms_Buf);
+            if (CNB.Br.ReadBoolean())
+            {
+                FNB.Init(filesize + 10000);
+                FNB.Bw.Write(s[1]);
+                if (Utils.LoadFile(FNB.Bw, s[0], Position))
+                {
+                    socket.Send(FNB.Ms_Buf);
+                    socket.Receive(CNB.Ms_Buf);
+                    WriteLine(CNB.Br.ReadString());
+                }
+                else
+                {
+                    CNB.Ms.Position = 0;
+                    CNB.Bw.Write("<error>");
+                    socket.Send(CNB.Ms_Buf);
+                    return false;
+                }
+                return true;
+            }
+            return false;
+
         }
 
         public Boolean PackageLoad(String[] s)

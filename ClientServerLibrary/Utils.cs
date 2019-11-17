@@ -25,7 +25,7 @@ namespace ClientServerLibrary
             return true;
         }
 
-        public static Boolean LoadFile(BinaryWriter bw,String path)
+        public static Boolean LoadFile(BinaryWriter bw, String path)
         {
             try
             {
@@ -41,6 +41,29 @@ namespace ClientServerLibrary
                 FS.Close();
             }
             catch(Exception E) { return false; }
+            return true;
+        }
+
+        public static Boolean LoadFile(BinaryWriter bw, String path, int Position)
+        {
+            try
+            {
+                if (!File.Exists(path))
+                    return false;
+                FileStream FS = new FileStream(path, FileMode.Open);
+                FileInfo FI = new FileInfo(path);
+                Byte[] buf = new Byte[FI.Length];
+                FS.Read(buf, 0, buf.Length);
+                bw.Write(FI.Name);
+                bw.Write((Int64)FI.Length);
+                //
+                Byte[] bufD = new Byte[FI.Length - Position];
+                buf.CopyTo(bufD, Position);
+                //
+                bw.Write(bufD);
+                FS.Close();
+            }
+            catch (Exception E) { return false; }
             return true;
         }
 
