@@ -62,7 +62,8 @@ namespace ClientServerTest
                         int CmdCode = 0;
                         WriteLine("cmd");
                         String cmd = ReadLine();
-                        String[] buf = cmd.Split(new char[] { '>' }, StringSplitOptions.RemoveEmptyEntries);
+                        String[] buf = cmd.Split(new char[] { '>' },
+                            StringSplitOptions.RemoveEmptyEntries);
 
                         if (!int.TryParse(buf[0], out CmdCode))
                         {

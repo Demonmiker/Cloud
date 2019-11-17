@@ -4,7 +4,7 @@ using System.Text;
 
 namespace ClientServerLibrary.Logger
 {
-    interface ILogger
+    public interface ILogger
     {
         void WriteLine(string s); 
 

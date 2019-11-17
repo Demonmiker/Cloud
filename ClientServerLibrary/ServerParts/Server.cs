@@ -42,10 +42,6 @@ namespace ClientServerLibrary
         /// (опционально) .log файл 
         /// </summary>
         ILogger log = new ConsoleLogger();
-
-        #region Докачка
-        
-        #endregion
         #endregion
 
         /// <summary>
@@ -78,13 +74,15 @@ namespace ClientServerLibrary
         }
 
         Socket cs;
+        
+        
         public void FindClient()
         {
             log.WriteLine("Ищу клиента");
-            cs = socket.Accept();
+            cs = socket.Accept(); // Приняли подключение
             log.WriteLine("Проверяю возможность и необходимость докачки");
             // Производим докачку если она нужна и таймаут ещё не закончился
-            if (Server.Renew.Exist)
+            if (Server.Renew.Need)
             {
                 if ((DateTime.Now - Renew.ClientLosenTime).TotalSeconds < 35)
                     // в этом месте в последствии "35" нужно будет заменить на
@@ -93,13 +91,17 @@ namespace ClientServerLibrary
                 else
                 {
                     log.WriteLine("Время для докачки вышло");
-                    Renew.Exist = false;
+                    Renew.Need = false;
                 }
             }
             else log.WriteLine("Докачка не нужна");
+            // Далее в любом случае начинаем ждать данных от клиента для обработки
             HandleClient();
         }
       
+        /// <summary>
+        /// Получение и обработка данных от клиента
+        /// </summary>
         private void HandleClient()
         {
             int cmd = 0;
@@ -110,6 +112,7 @@ namespace ClientServerLibrary
                 {
                     cs.Receive(CNB.Ms_Buf);
                     CNB.Ms.Position = 0;
+                    // Получаем команду и вызываем метод, выбирающий нужный обработчик
                     cmd = CNB.Br.ReadInt32();
                     HandleReceive((Command)cmd);
                 }
@@ -123,10 +126,9 @@ namespace ClientServerLibrary
                     if (CNB.Ms_Buf.Length != 0 && c == Command.Save)
                     {
                         Renew.ClientLosenTime = DateTime.Now;
-                        Renew.ExecCommand = c;
                         Renew.ExecCommandParam = CNB.Br.ReadString();
                         Renew.BuffPosition = Renew.GetPosition(CNB.Ms_Buf);
-                        Renew.Exist = true;
+                        Renew.Need = true;
                     }
                     // Далее в любом случае начинаем заново ждать подключения
                     FindClient();
@@ -134,6 +136,10 @@ namespace ClientServerLibrary
             }
         }
 
+        /// <summary>
+        /// Вызов нужного для данной команды обработчика
+        /// </summary>
+        /// <param name="cmd"></param>
         private void HandleReceive(Command cmd)
         {
             switch(cmd)
@@ -336,13 +342,21 @@ namespace ClientServerLibrary
         }
         #endregion
 
-
+        /// <summary>
+        /// Возвразает путь относительно папки "ServerData"
+        /// <para/> (При пустой строке возвращает "ServerData")
+        /// </summary>
+        /// <param name="_path"></param>
+        /// <returns></returns>
         private String SD(String _path)
         {
             if (_path == String.Empty) return "ServerData";
             else return "ServerData/" + _path; 
         }
 
+        /// <summary>
+        /// Закрытие сокета
+        /// </summary>
         public void Stop()
         {
             socket.Close();

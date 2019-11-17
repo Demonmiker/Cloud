@@ -46,6 +46,7 @@ namespace ClientServerLibrary
             try
             {
                 socket.Connect(IP_Adress, Port_Number);
+                Renew();
             }
             catch { return false; }
             return true;
@@ -62,9 +63,28 @@ namespace ClientServerLibrary
             try
             {
                 socket.Connect(config.IP_Adress, config.Port_Number);
+                Renew();
                 return true;
             }
             catch { return false; }
+        }
+
+        private void Renew()
+        {
+            socket.Receive(CNB.Ms_Buf);
+            if (CNB.Br.ReadBoolean())
+            {
+                WriteLine("Произвожу докачку...");
+                //
+                // Докачка
+                //
+
+                //
+                // Докачка закончена
+                //
+                WriteLine("Докачка закончена");
+            }
+            else WriteLine("Докачка не требуется");
         }
 
         public void Close()
