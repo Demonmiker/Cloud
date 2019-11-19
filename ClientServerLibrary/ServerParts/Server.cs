@@ -97,9 +97,16 @@ namespace ClientServerLibrary
                 {
                     log.WriteLine("Время для докачки вышло");
                     Renew.Need = false;
+                    CNB.Bw.Write(Renew.Need);
+                    cs.Send(CNB.Ms_Buf);
                 }
             }
-            else log.WriteLine("Докачка не нужна");
+            else
+            {
+                log.WriteLine("Докачка не нужна");
+                CNB.Bw.Write(Renew.Need);
+                cs.Send(CNB.Ms_Buf);
+            }
             // Далее в любом случае начинаем ждать данных от клиента для обработки
             HandleClient();
         }
